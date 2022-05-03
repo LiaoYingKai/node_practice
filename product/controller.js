@@ -1,26 +1,22 @@
-const { randomUUID } = require('crypto');
-const Product = require('./model')
-
-function getList() {
-  const list = Object.keys(Product).map(id => ({
-    id,
-    ...Product[id]
-  }))
-
-  return list
-}
+const {
+  hasProduct,
+  getProducts,
+  getProduct,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+} = require('./model')
 
 function list(req, res) {
   res.status(200).send({
     code: 20000,
-    data: getList()
+    data: getProducts()
   })
 }
 
 function get(req, res) {
   const productId = req.params.productId
-  const product = Product[productId]
-  if (!product) {
+  if (!hasProduct(productId)) {
     res.status(400).send({
       code: 40001,
       message: 'Can not find Product Id'
@@ -30,15 +26,12 @@ function get(req, res) {
 
   res.status(200).send({
     code: 20000,
-    data: {
-      ...product,
-      id: productId
-    }
+    data: getProduct(productId)
   })
 }
 
 function post (req, res) {
-  const body = req.body 
+  const body = req.body
   if (!body.name || !body.price) {
     res.status(400).send({
       code: 40001,
@@ -46,10 +39,7 @@ function post (req, res) {
     })
     return;
   }
-  const id = randomUUID()
-  Product[id] = {
-    ...body
-  }
+  const id = addProduct(body)
 
   res.status(201).send({
     code: 20001,
@@ -62,9 +52,8 @@ function post (req, res) {
 
 function update (req, res) {
   const productId = req.params.productId
-  const body = req.body 
-  const product = Product[productId]
-  if (!product) {
+  const body = req.body
+  if (!hasProduct(productId)) {
     res.status(400).send({
       code: 40001,
       message: 'Can not find Product Id'
@@ -73,22 +62,18 @@ function update (req, res) {
   }
   // 判斷欄位是否在裡面
 
-  Product[productId] = {
-    ...product,
-    ...body,
-  }
+  updateProduct(productId, body)
 
   res.status(200).send({
     code: 20000,
     message: "Edit Success",
-    data: getList()
+    data: getProducts()
   })
 }
 
 function remove(req, res) {
   const productId = req.params.productId
-  const product = Product[productId]
-  if (!product) {
+  if (!hasProduct(productId)) {
     res.status(400).send({
       code: 40001,
       message: 'Can not find Product Id'
@@ -96,12 +81,12 @@ function remove(req, res) {
     return;
   }
 
-  delete Product[productId]
+  deleteProduct(productId)
 
   res.status(201).send({
     code: 20001,
     message: 'Delete success',
-    data: getList()
+    data: getProducts()
   })
 }
 
