@@ -1,15 +1,23 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const controller = require('./controller')
+const controller = require("./controller");
+const middleware = require("./middleware");
 
-router.get('/list', controller.list)
+router.use(middleware.addLog);
 
-router.get('/:productId', controller.get)
+router.get("/list", controller.list);
 
-router.post('/', controller.post)
+router.get("/:productId", middleware.checkId, controller.get);
 
-router.put('/:productId', controller.update)
+router.post("/", middleware.checkBody, controller.post);
 
-router.delete('/:productId', controller.remove)
+router.put(
+  "/:productId",
+  middleware.checkId,
+  middleware.checkBody,
+  controller.update
+);
+
+router.delete("/:productId", middleware.checkId, controller.remove);
 
 module.exports = router;
